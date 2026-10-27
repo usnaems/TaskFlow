@@ -1,16 +1,16 @@
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ product_name }}</title>
-</head>
-<body>
-    <center>
-        <h1>{{ product_name }}</h1>
-        <p>Веб-приложение для управления задачами и командной работы.</p>
-        <p>Версия {{ version }}</p>
-        <p>Разработка продолжается</p>
-    </center>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}TaskFlow — Главная{% endblock %}
+
+{% block content %}
+    <h2>Веб-приложение для управления задачами и командной работы</h2>
+
+    <p>Версия {{ version }}</p>
+    <p>Разработка продолжается</p>
+
+    <p>Создавайте задачи и просматривайте их список.</p>
+
+    <p><a href="/tasks/new">Создать задачу</a></p>
+    <p><a href="/tasks">Посмотреть задачи</a></p>
+{% endblock %}
