@@ -1,0 +1,14 @@
+
+{% extends "base.html" %}
+
+{% block title %}TaskFlow — Ошибка{% endblock %}
+
+{% block content %}
+    <h2>Не удалось выполнить действие</h2>
+
+    <p>{{ reason }}</p>
+
+    <p>Проверьте введённые данные и попробуйте снова.</p>
+
+    <p><a href="/tasks/new">Вернуться к созданию задачи</a></p>
+{% endblock %}

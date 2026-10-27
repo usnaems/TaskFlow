@@ -1,0 +1,22 @@
+
+{% extends "base.html" %}
+
+{% block title %}TaskFlow — Новая задача{% endblock %}
+
+{% block content %}
+    <h2>Создание задачи</h2>
+
+    <form action="/tasks/new" method="post">
+        <p>
+            <label for="title">Название задачи:</label><br>
+            <input type="text" id="title" name="title" required>
+        </p>
+
+        <p>
+            <label for="description">Описание:</label><br>
+            <textarea id="description" name="description" rows="4" cols="40"></textarea>
+        </p>
+
+        <button type="submit">Сохранить задачу</button>
+    </form>
+{% endblock %}
