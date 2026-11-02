@@ -1,72 +1,77 @@
 # TaskFlow
 
-Веб-приложение для управления задачами и командной работы.
+TaskFlow — веб-приложение для управления задачами и совместной работы команды.
 
-## Описание
+## Версия
 
-TaskFlow — учебный проект, разрабатываемый в рамках лабораторных работ по дисциплине «Методы и средства проектирования информационных систем».
-
-Текущая версия: **0.0.1**
-
-Статус разработки: разработка продолжается.
+**0.0.3**
 
 ## Технологии
 
 - Python 3.15
-- FastAPI 0.115.12
-- Uvicorn 0.34.2
-- Jinja2 3.1.6
+- FastAPI
+- Uvicorn
+- Jinja2
+- SQLAlchemy
+- PostgreSQL 18
 - Docker
+- Docker Compose
 
-## Запуск через Docker
+## Архитектура
 
-Скачайте образ:
+Приложение состоит из двух Docker-сервисов:
+
+- **app** — веб-приложение на FastAPI.
+- **db** — база данных PostgreSQL 18.
+
+Данные задач хранятся в PostgreSQL. Для постоянного хранения используется именованный Docker volume `dbdata`. При запуске приложения таблицы базы данных создаются автоматически.
+
+## Запуск
+
+Репозиторий: https://github.com/usnaems/TaskFlow
+
+Ветка: `lab3`
+
+Pull Request: https://github.com/usnaems/TaskFlow/pull/2
+
+Docker-образ: `danildol/taskflow:0.0.3`
+
+Страница образа: https://hub.docker.com/r/danildol/taskflow
+
+Клонирование репозитория:
 
 ```bash
-docker pull danildol/taskflow:0.0.1
-```
-
-Запустите контейнер:
-
-```bash
-docker run --rm -p 8080:8080 danildol/taskflow:0.0.1
-```
-
-Откройте приложение в браузере:
-
-http://localhost:8080
-
-Чтобы остановить приложение, нажмите `Ctrl+C` в терминале.
-
-## Сборка образа самостоятельно
-
-Клонируйте репозиторий:
-
-```bash
-git clone https://github.com/usnaems/TaskFlow.git
+git clone -b lab3 https://github.com/usnaems/TaskFlow
 cd TaskFlow
 ```
 
-Соберите образ:
+Запуск приложения и базы данных:
 
 ```bash
-docker build -t taskflow:0.0.1 .
+docker compose up -d
 ```
 
-Запустите контейнер:
+После запуска приложение доступно по адресу:
+
+http://localhost:8080
+
+Проверить состояние контейнеров можно командой:
 
 ```bash
-docker run --rm -p 8080:8080 taskflow:0.0.1
+docker compose ps
 ```
 
-## Поддерживаемые архитектуры
+Остановка контейнеров:
 
-Опубликованный Docker-образ поддерживает:
+```bash
+docker compose down
+```
 
-- `linux/amd64` — компьютеры с процессорами Intel и AMD.
-- `linux/arm64` — компьютеры с ARM-процессорами, включая Apple Silicon.
+Данные PostgreSQL сохраняются в Docker volume `dbdata` и не удаляются при обычной остановке контейнеров. Для удаления данных вместе с томом используется команда `docker compose down -v`.
 
-## Ссылки
+## Основные функции
 
-- GitHub: https://github.com/usnaems/TaskFlow
-- Docker Hub: https://hub.docker.com/r/danildol/taskflow
+- Просмотр списка задач.
+- Создание новых задач.
+- Обработка некорректных запросов.
+- Постоянное хранение данных в PostgreSQL.
