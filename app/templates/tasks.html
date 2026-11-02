@@ -1,0 +1,20 @@
+
+{% extends "base.html" %}
+
+{% block title %}TaskFlow — Список задач{% endblock %}
+
+{% block content %}
+    <h2>Список задач</h2>
+
+    <p><a href="/tasks/new">Создать новую задачу</a></p>
+
+    {% if tasks %}
+        {% for task in tasks %}
+            <hr>
+            <h3>{{ task.id }}. {{ task.title }}</h3>
+            <p>{{ task.description or "Описание отсутствует" }}</p>
+        {% endfor %}
+    {% else %}
+        <p>Пока задач нет.</p>
+    {% endif %}
+{% endblock %}
