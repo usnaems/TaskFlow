@@ -1,27 +1,28 @@
-
-import json
+from contextlib import asynccontextmanager
 from pathlib import Path
-
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-app = FastAPI(title="TaskFlow", version="0.0.2")
+from app.database import Base, engine, SessionLocal
+from app import models
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_FILE = BASE_DIR / "data" / "tasks.json"
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
-def read_tasks():
-    with open(DATA_FILE, "r", encoding="utf-8") as file:
-        return json.load(file)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
 
 
-def save_tasks(tasks):
-    with open(DATA_FILE, "w", encoding="utf-8") as file:
-        json.dump(tasks, file, ensure_ascii=False, indent=4)
+app = FastAPI(
+    title="TaskFlow",
+    version="0.0.3",
+    lifespan=lifespan
+)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -29,16 +30,22 @@ async def home(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"product_name": "TaskFlow", "version": app.version},
+        context={
+            "product_name": "TaskFlow",
+            "version": app.version
+        },
     )
 
 
 @app.get("/tasks", response_class=HTMLResponse)
-async def tasks_page(request: Request):
+def tasks_page(request: Request):
+    with SessionLocal() as db:
+        tasks = db.query(models.Task).order_by(models.Task.id).all()
+
     return templates.TemplateResponse(
         request=request,
         name="tasks.html",
-        context={"tasks": read_tasks()},
+        context={"tasks": tasks},
     )
 
 
@@ -52,7 +59,11 @@ async def new_task_page(request: Request):
 
 
 @app.post("/tasks/new", response_class=HTMLResponse)
-async def create_task(request: Request, title: str = Form(...), description: str = Form("")):
+def create_task(
+    request: Request,
+    title: str = Form(...),
+    description: str = Form("")
+):
     title = title.strip()
 
     if not title:
@@ -63,15 +74,14 @@ async def create_task(request: Request, title: str = Form(...), description: str
             status_code=400,
         )
 
-    tasks = read_tasks()
-    next_id = max((task["id"] for task in tasks), default=0) + 1
+    with SessionLocal() as db:
+        task = models.Task(
+            title=title,
+            description=description.strip()
+        )
 
-    tasks.append({
-        "id": next_id,
-        "title": title,
-        "description": description.strip(),
-    })
-    save_tasks(tasks)
+        db.add(task)
+        db.commit()
 
     return RedirectResponse(url="/tasks", status_code=303)
 
@@ -81,6 +91,8 @@ async def access_denied(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="access_denied.html",
-        context={"reason": "Доступ к действию отклонён из-за некорректных данных."},
+        context={
+            "reason": "Доступ к действию отклонён из-за некорректных данных."
+        },
         status_code=400,
     )
